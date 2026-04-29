@@ -27,6 +27,7 @@ interface TableCellProps {
   children: ReactNode;
   isHeader?: boolean;
   className?: string;
+  colSpan?: number;
 }
 
 const Table: React.FC<TableProps> = ({ children, className }) => {
@@ -49,9 +50,10 @@ const TableCell: React.FC<TableCellProps> = ({
   children,
   isHeader = false,
   className,
+  colSpan,
 }) => {
   const CellTag = isHeader ? "th" : "td";
-  return <CellTag className={` ${className}`}>{children}</CellTag>;
+  return <CellTag colSpan={colSpan} className={` ${className}`}>{children}</CellTag>;
 };
 
 interface OrderItem {
@@ -72,6 +74,8 @@ interface Order {
 const OrderHistoryTable: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -103,6 +107,37 @@ const OrderHistoryTable: React.FC = () => {
     return items.map(item => `${item.product} x${item.qty}`).join(", ");
   };
 
+  const getDateFromTimestamp = (timestamp: any): Date | null => {
+    if (timestamp?.toDate) {
+      return timestamp.toDate();
+    }
+    return null;
+  };
+
+  const filteredOrders = orders.filter((order) => {
+    const orderDate = getDateFromTimestamp(order.createdAt);
+    if (!orderDate) return true;
+
+    if (startDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      if (orderDate < start) return false;
+    }
+
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      if (orderDate > end) return false;
+    }
+
+    return true;
+  });
+
+  const resetFilters = () => {
+    setStartDate("");
+    setEndDate("");
+  };
+
   if (loading) {
     return <div>Loading orders...</div>;
   }
@@ -118,6 +153,45 @@ const OrderHistoryTable: React.FC = () => {
         </p>
       </div>
 
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+            Start Date
+          </label>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 outline-none focus:border-brand-500 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+          />
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-400">
+            End Date
+          </label>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            className="h-10 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 outline-none focus:border-brand-500 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+          />
+        </div>
+
+        <div className="flex items-end">
+          <button
+            onClick={resetFilters}
+            className="h-10 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            Reset Filters
+          </button>
+        </div>
+      </div>
+
+      <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+        Showing {filteredOrders.length} of {orders.length} orders
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -128,14 +202,20 @@ const OrderHistoryTable: React.FC = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {orders.map((order) => (
-            <TableRow key={order.id}>
-              <TableCell>{order.id}</TableCell>
-              <TableCell>{getItemsSummary(order.items)}</TableCell>
-              <TableCell>₹{order.grandTotal}</TableCell>
-              <TableCell>{formatDate(order.createdAt)}</TableCell>
+          {filteredOrders.length > 0 ? (
+            filteredOrders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell>{order.id}</TableCell>
+                <TableCell>{getItemsSummary(order.items)}</TableCell>
+                <TableCell>₹{order.grandTotal}</TableCell>
+                <TableCell>{formatDate(order.createdAt)}</TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={4}>No orders found for the selected date range.</TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </div>

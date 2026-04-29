@@ -5,11 +5,9 @@ import {
   ChevronDownIcon,
   GridIcon,
   ListIcon,
-  PageIcon,
   TableIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import SidebarWidget from "./SidebarWidget";
 
 type NavItem = {
   name: string;
@@ -34,14 +32,14 @@ const navItems: NavItem[] = [
     icon: <TableIcon />,
     subItems: [{ name: "product history", path: "/product-history", pro: false }],
   },
-  {
-    name: "Pages",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Blank Page", path: "/blank", pro: false },
-      { name: "404 Error", path: "/error-404", pro: false },
-    ],
-  },
+  // {
+  //   name: "Pages",
+  //   icon: <PageIcon />,
+  //   subItems: [
+  //     { name: "Blank Page", path: "/blank", pro: false },
+  //     { name: "404 Error", path: "/error-404", pro: false },
+  //   ],
+  // },
 ];
 
 const AppSidebar: React.FC = () => {
