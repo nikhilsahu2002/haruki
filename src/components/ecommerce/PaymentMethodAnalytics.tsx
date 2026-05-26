@@ -17,17 +17,18 @@ interface Order {
   items: OrderItem[];
   grandTotal: number;
   createdAt: any;
+  status?: string;
 }
 
 interface PaymentStats {
-  cash: number;
-  upi: number;
+  paid: number;
+  notPaid: number;
 }
 
 const PaymentMethodAnalytics: React.FC = () => {
   const [paymentStats, setPaymentStats] = useState<PaymentStats>({
-    cash: 0,
-    upi: 0,
+    paid: 0,
+    notPaid: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -40,18 +41,20 @@ const PaymentMethodAnalytics: React.FC = () => {
           ...doc.data(),
         })) as Order[];
 
-        // Count payment methods
+        const completedOrders = ordersData.filter((order) => order.status === "completed");
+
+        // Count payment status only for completed orders
         const stats: PaymentStats = {
-          cash: 0,
-          upi: 0,
+          paid: 0,
+          notPaid: 0,
         };
 
-        ordersData.forEach((order) => {
+        completedOrders.forEach((order) => {
           order.items.forEach((item) => {
-            if (item.paymentMode === "cash") {
-              stats.cash += 1;
-            } else if (item.paymentMode === "upi") {
-              stats.upi += 1;
+            if (item.paymentMode === "paid" || item.paymentMode === "cash" || item.paymentMode === "upi") {
+              stats.paid += 1;
+            } else if (item.paymentMode === "not-paid") {
+              stats.notPaid += 1;
             }
           });
         });
@@ -67,13 +70,13 @@ const PaymentMethodAnalytics: React.FC = () => {
     fetchOrders();
   }, []);
 
-  const total = paymentStats.cash + paymentStats.upi;
-  const cashPercentage = total > 0 ? ((paymentStats.cash / total) * 100).toFixed(1) : 0;
-  const upiPercentage = total > 0 ? ((paymentStats.upi / total) * 100).toFixed(1) : 0;
+  const total = paymentStats.paid + paymentStats.notPaid;
+  const paidPercentage = total > 0 ? ((paymentStats.paid / total) * 100).toFixed(1) : 0;
+  const notPaidPercentage = total > 0 ? ((paymentStats.notPaid / total) * 100).toFixed(1) : 0;
 
   const options: ApexOptions = {
     colors: ["#10B981", "#465FFF"],
-    labels: ["Cash", "UPI"],
+    labels: ["Paid", "Not Paid"],
     chart: {
       fontFamily: "Outfit, sans-serif",
       toolbar: {
@@ -148,10 +151,10 @@ const PaymentMethodAnalytics: React.FC = () => {
     <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-sm dark:border-gray-800 dark:bg-white/[0.03] sm:p-6">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-          Payment Methods Distribution
+          Payment Status Distribution
         </h3>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Orders by payment method
+          Orders by paid or not paid status
         </p>
       </div>
 
@@ -160,7 +163,7 @@ const PaymentMethodAnalytics: React.FC = () => {
           <div className="w-full">
             <Chart
               type="donut"
-              series={[paymentStats.cash, paymentStats.upi]}
+              series={[paymentStats.paid, paymentStats.notPaid]}
               options={options}
               height={300}
             />
@@ -168,46 +171,46 @@ const PaymentMethodAnalytics: React.FC = () => {
         </div>
 
         <div className="flex flex-col justify-center gap-4">
-          {/* Cash Payment Stats */}
+          {/* Paid Orders */}
           <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
             <div className="mb-2 flex items-center gap-2">
               <span className="inline-flex h-3 w-3 rounded-full bg-green-500"></span>
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Cash Payment
+                Paid Orders
               </span>
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {paymentStats.cash}
+              {paymentStats.paid}
             </p>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              {cashPercentage}% of total orders
+              {paidPercentage}% of total orders
             </p>
             <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
               <div
                 className="h-full bg-green-500"
-                style={{ width: `${cashPercentage}%` }}
+                style={{ width: `${paidPercentage}%` }}
               ></div>
             </div>
           </div>
 
-          {/* UPI Payment Stats */}
+          {/* Not Paid Orders */}
           <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
             <div className="mb-2 flex items-center gap-2">
               <span className="inline-flex h-3 w-3 rounded-full bg-blue-500"></span>
               <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                UPI Payment
+                Not Paid Orders
               </span>
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
-              {paymentStats.upi}
+              {paymentStats.notPaid}
             </p>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              {upiPercentage}% of total orders
+              {notPaidPercentage}% of total orders
             </p>
             <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
               <div
                 className="h-full bg-blue-500"
-                style={{ width: `${upiPercentage}%` }}
+                style={{ width: `${notPaidPercentage}%` }}
               ></div>
             </div>
           </div>

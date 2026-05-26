@@ -15,6 +15,7 @@ interface Order {
   items: OrderItem[];
   grandTotal: number;
   createdAt: any;
+  status?: string;
 }
 
 interface ProductSale {
@@ -37,10 +38,12 @@ const TopSellingProducts: React.FC = () => {
           ...doc.data(),
         })) as Order[];
 
-        // Aggregate product data
+        const completedOrders = ordersData.filter((order) => order.status === "completed");
+
+        // Aggregate product data from completed orders
         const productMap: { [key: string]: ProductSale } = {};
 
-        ordersData.forEach((order) => {
+        completedOrders.forEach((order) => {
           order.items.forEach((item) => {
             if (!productMap[item.product]) {
               productMap[item.product] = {

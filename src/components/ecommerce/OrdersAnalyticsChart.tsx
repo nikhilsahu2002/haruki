@@ -17,6 +17,7 @@ interface Order {
   items: OrderItem[];
   grandTotal: number;
   createdAt: any;
+  status?: string;
 }
 
 type TimeRange = "daily" | "weekly" | "monthly";
@@ -38,7 +39,8 @@ const OrdersAnalyticsChart: React.FC = () => {
           ...doc.data(),
         })) as Order[];
 
-        processOrdersData(ordersData, timeRange);
+        const completedOrders = ordersData.filter((order) => order.status === "completed");
+        processOrdersData(completedOrders, timeRange);
       } catch (error) {
         console.error("Error fetching orders:", error);
       } finally {

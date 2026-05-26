@@ -62,6 +62,7 @@ interface OrderItem {
   price: number;
   paymentMode: string;
   total: number;
+  customerName: string;
 }
 
 interface Order {
@@ -69,6 +70,7 @@ interface Order {
   items: OrderItem[];
   grandTotal: number;
   createdAt: any; // Firestore Timestamp
+  status?: string;
 }
 
 const OrderHistoryTable: React.FC = () => {
@@ -104,7 +106,14 @@ const OrderHistoryTable: React.FC = () => {
   };
 
   const getItemsSummary = (items: OrderItem[]) => {
-    return items.map(item => `${item.product} x${item.qty}`).join(", ");
+    return items.map((item) => `${item.product} x${item.qty}`).join(", ");
+  };
+
+  const getCustomerNames = (items: OrderItem[]) => {
+    const names = items
+      .map((item) => item.customerName)
+      .filter(Boolean);
+    return Array.from(new Set(names)).join(", ") || "Unknown";
   };
 
   const getDateFromTimestamp = (timestamp: any): Date | null => {
@@ -195,25 +204,27 @@ const OrderHistoryTable: React.FC = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableCell>Order ID</TableCell>
+            <TableCell>For</TableCell>
             <TableCell>Items</TableCell>
             <TableCell>Grand Total</TableCell>
             <TableCell>Date</TableCell>
+            <TableCell>Status</TableCell>
           </TableRow>
         </TableHeader>
         <TableBody>
           {filteredOrders.length > 0 ? (
             filteredOrders.map((order) => (
               <TableRow key={order.id}>
-                <TableCell>{order.id}</TableCell>
+                <TableCell>{getCustomerNames(order.items)}</TableCell>
                 <TableCell>{getItemsSummary(order.items)}</TableCell>
                 <TableCell>₹{order.grandTotal}</TableCell>
                 <TableCell>{formatDate(order.createdAt)}</TableCell>
+                <TableCell>{order.status || "cooking"}</TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={4}>No orders found for the selected date range.</TableCell>
+              <TableCell colSpan={5}>No orders found for the selected date range.</TableCell>
             </TableRow>
           )}
         </TableBody>

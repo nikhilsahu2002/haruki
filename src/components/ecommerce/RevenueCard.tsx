@@ -15,6 +15,7 @@ interface Order {
   items: OrderItem[];
   grandTotal: number;
   createdAt: any;
+  status?: string;
 }
 
 const RevenueCard: React.FC = () => {
@@ -32,14 +33,16 @@ const RevenueCard: React.FC = () => {
           ...doc.data(),
         })) as Order[];
 
-        // Calculate total revenue
-        const revenue = ordersData.reduce((sum, order) => sum + order.grandTotal, 0);
-        
-        // Calculate average order value
-        const avgValue = ordersData.length > 0 ? revenue / ordersData.length : 0;
+        const completedOrders = ordersData.filter((order) => order.status === "completed");
+
+        // Calculate total revenue only for completed orders
+        const revenue = completedOrders.reduce((sum, order) => sum + order.grandTotal, 0);
+
+        // Calculate average order value only for completed orders
+        const avgValue = completedOrders.length > 0 ? revenue / completedOrders.length : 0;
 
         setTotalRevenue(revenue);
-        setTotalOrders(ordersData.length);
+        setTotalOrders(completedOrders.length);
         setAvgOrderValue(avgValue);
       } catch (error) {
         console.error("Error fetching orders:", error);

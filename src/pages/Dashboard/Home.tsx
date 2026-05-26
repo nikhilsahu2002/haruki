@@ -2,6 +2,7 @@ import OrdersAnalyticsChart from "../../components/ecommerce/OrdersAnalyticsChar
 import RevenueCard from "../../components/ecommerce/RevenueCard";
 import TopSellingProducts from "../../components/ecommerce/TopSellingProducts";
 import PaymentMethodAnalytics from "../../components/ecommerce/PaymentMethodAnalytics";
+import LatestCookingOrders from "../../components/ecommerce/LatestCookingOrders";
 import PageMeta from "../../components/common/PageMeta";
 
 export default function Home() {
@@ -23,6 +24,11 @@ export default function Home() {
             </p>
           </div>
           <RevenueCard />
+        </div>
+
+        {/* Latest Cooking Orders */}
+        <div className="col-span-12 lg:col-span-6">
+          <LatestCookingOrders />
         </div>
 
         {/* Orders Analytics Chart */}
