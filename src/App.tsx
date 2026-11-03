@@ -18,6 +18,7 @@ import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import ProductOrderForm from "./components/form/ProductOrderForm";
+import Inventory from "./pages/Inventory/Inventory";
 
 export default function App() {
   return (
@@ -36,6 +37,7 @@ export default function App() {
 
             {/* Forms */}
             <Route path="/product-order" element={<ProductOrderForm />} />
+            <Route path="/inventory" element={<Inventory />} />
 
             {/* Tables */}
             <Route path="/product-history" element={<BasicTables />} />

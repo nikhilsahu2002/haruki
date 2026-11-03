@@ -28,6 +28,11 @@ const navItems: NavItem[] = [
     subItems: [{ name: "Product Order", path: "/product-order", pro: false }],
   },
   {
+    name: "Inventory",
+    icon: <TableIcon />,
+    path: "/inventory",
+  },
+  {
     name: "Tables",
     icon: <TableIcon />,
     subItems: [{ name: "product history", path: "/product-history", pro: false }],
